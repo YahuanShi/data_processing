@@ -20,10 +20,10 @@ Other
   Q / Escape  quit
 
 Usage:
-    python 06_visualize_trajectory.py processed_dir
-    python 06_visualize_trajectory.py processed_dir --original original_dir
-    python 06_visualize_trajectory.py processed_file.hdf5
-    python 06_visualize_trajectory.py processed_file.hdf5 --original original_dir
+    python viz/viz_trajectory.py processed_dir
+    python viz/viz_trajectory.py processed_dir --original original_dir
+    python viz/viz_trajectory.py processed_file.hdf5
+    python viz/viz_trajectory.py processed_file.hdf5 --original original_dir
 """
 
 import argparse

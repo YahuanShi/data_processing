@@ -6,9 +6,9 @@ Layout (top -> bottom):
     header  ->  video row  ->  progress bar  ->  per-joint trajectory strips
 
 Usage:
-    python visualize_episode.py <path>              # file or directory
-    python visualize_episode.py <path> --scale 2.0
-    python visualize_episode.py <path> --fps 20
+    python viz/viz_episode.py <path>              # file or directory
+    python viz/viz_episode.py <path> --scale 2.0
+    python viz/viz_episode.py <path> --fps 20
 
 Keyboard:
     SPACE           pause / resume
