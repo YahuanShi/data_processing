@@ -25,7 +25,7 @@ import sys
 import h5py
 import numpy as np
 
-DEFAULT_MIN_STEPS = 20
+DEFAULT_MIN_STEPS = 80
 DEFAULT_SPIKE_THRESH = 0.15  # rad
 DEFAULT_SAME_THRESH = 1e-4
 
