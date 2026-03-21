@@ -9,8 +9,10 @@ The last 2 timesteps are also left unchanged so the final joint state is
 never altered by smoothing.
 
 Usage:
-    python3 smooth_episodes.py path/to/dataset_dir --output smoothed/
-    python3 smooth_episodes.py path/to/dataset_dir --output smoothed/ --window 9 --poly 2
+    python3 03_smooth_episodes.py src [dst]
+    python3 03_smooth_episodes.py path/to/dataset_dir        smoothed/
+    python3 03_smooth_episodes.py path/to/episode_0.hdf5     smoothed/episode_0.hdf5
+    python3 03_smooth_episodes.py path/to/dataset_dir        smoothed/ --window 9 --poly 2
 """
 
 import argparse
@@ -93,49 +95,44 @@ def smooth_episode(src: str, dst: str, window: int, poly: int) -> None:
             f.create_dataset("observations/images/front_image_1", data=front, compression="gzip")
 
 
+def collect_files(src: str) -> list[str]:
+    if os.path.isfile(src):
+        return [src]
+    if os.path.isdir(src):
+        files = sorted(glob.glob(os.path.join(src, "*.hdf5")))
+        if not files:
+            sys.exit(f"No .hdf5 files found in: {src}")
+        return files
+    sys.exit(f"Path does not exist: {src}")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Smooth qpos and action with Savitzky-Golay filter.")
-    parser.add_argument("dataset_dir", help="Directory containing episode_*.hdf5 files, or a single .hdf5 file")
-    parser.add_argument(
-        "output", nargs="?", default=None, help="Output directory for smoothed files (default: dataset_dir)"
-    )
-    parser.add_argument(
-        "--output",
-        "-o",
-        default=None,
-        dest="output_flag",
-        help="Output directory for smoothed files (alias for positional)",
-    )
+    parser.add_argument("src", help="Single .hdf5 file or directory containing *.hdf5 files")
+    parser.add_argument("dst", nargs="?", default=None, help="Output file or directory (default: same as src)")
     parser.add_argument(
         "--window", type=int, default=DEFAULT_WINDOW, help=f"Filter window length (odd, default {DEFAULT_WINDOW})"
     )
     parser.add_argument("--poly", type=int, default=DEFAULT_POLY, help=f"Polynomial order (default {DEFAULT_POLY})")
     args = parser.parse_args()
 
-    # resolve output: positional > --output flag > default to dataset_dir
-    if args.output is None:
-        args.output = args.output_flag
-    if args.output is None:
-        args.output = args.dataset_dir if os.path.isdir(args.dataset_dir) else os.path.dirname(args.dataset_dir)
+    if args.dst is None:
+        args.dst = args.src if os.path.isdir(args.src) else os.path.dirname(args.src) or "."
 
     if args.window % 2 == 0:
         sys.exit("ERROR: --window must be odd")
     if args.poly >= args.window:
         sys.exit("ERROR: --poly must be less than --window")
 
-    if os.path.isfile(args.dataset_dir):
-        files = [args.dataset_dir]
-    else:
-        files = sorted(glob.glob(os.path.join(args.dataset_dir, "*.hdf5")))
-    if not files:
-        sys.exit(f"No .hdf5 files found in: {args.dataset_dir}")
+    files = collect_files(args.src)
+    single = os.path.isfile(args.src)
 
-    os.makedirs(args.output, exist_ok=True)
-    print(f"Smoothing {len(files)} episode(s)  (window={args.window}, poly={args.poly})  →  {args.output}")
+    if not single:
+        os.makedirs(args.dst, exist_ok=True)
+    print(f"Smoothing {len(files)} episode(s)  (window={args.window}, poly={args.poly})  →  {args.dst}")
 
     for path in files:
-        name = os.path.basename(path)
-        dst = os.path.join(args.output, name)
+        dst = args.dst if single else os.path.join(args.dst, os.path.basename(path))
         smooth_episode(path, dst, args.window, args.poly)
         print(f"  WROTE {dst}")
 

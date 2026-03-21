@@ -1,0 +1,13 @@
+# data_processing — Python dependencies
+#
+# Install with:
+#   pip install -r requirements.txt
+#
+# Or via the setup script:
+#   bash setup_env.sh
+
+numpy>=1.24
+scipy>=1.10
+h5py>=3.8
+opencv-python>=4.7       # viz tools and resize_images
+matplotlib>=3.7          # viz tools only
