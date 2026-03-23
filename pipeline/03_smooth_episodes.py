@@ -27,7 +27,7 @@ from scipy.signal import savgol_filter
 
 DEFAULT_WINDOW = 13  # must be odd
 DEFAULT_POLY = 1
-FLAT_STD_THRESH = 1e-3  # rolling-std threshold to detect flat regions
+FLAT_STD_THRESH = 1e-2  # rolling-std threshold to detect flat regions
 FLAT_RANGE_THRESH = 1e-2  # if entire column range < this, skip smoothing it
 PRESERVE_TAIL = 2  # number of final timesteps to leave untouched
 
