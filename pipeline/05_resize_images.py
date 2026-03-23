@@ -4,7 +4,7 @@ Resize / Crop Images in HDF5 Episodes
 ======================================
 
 Converts all camera image streams in HDF5 episodes from the recorded resolution
-(e.g. 480×480) to the target training resolution (default 224×224).
+(e.g. 480x480) to the target training resolution (default 224x224).
 
 Intended as the final step in the data-processing pipeline, after trimming and
 smoothing, producing a training-ready dataset. Compatible with openpi / pi0.5
@@ -63,12 +63,11 @@ import cv2
 import h5py
 import numpy as np
 
-
 # ── Image transform functions ──────────────────────────────────────────────────
 
 
 def _center_crop_resize(img: np.ndarray, size: int) -> np.ndarray:
-    """Square-crop the centre, then resize to size×size."""
+    """Square-crop the centre, then resize to size x size."""
     h, w = img.shape[:2]
     side = min(h, w)
     y0, x0 = (h - side) // 2, (w - side) // 2
@@ -77,7 +76,7 @@ def _center_crop_resize(img: np.ndarray, size: int) -> np.ndarray:
 
 
 def _resize(img: np.ndarray, size: int) -> np.ndarray:
-    """Resize the full image directly to size×size."""
+    """Resize the full image directly to size x size."""
     return cv2.resize(img, (size, size), interpolation=cv2.INTER_AREA)
 
 
@@ -196,16 +195,16 @@ def main():
     files = collect_files(args.src)
     single = os.path.isfile(args.src)
 
-    print(f"\n{'─'*60}")
+    print(f"\n{'─' * 60}")
     print(f"  Source  : {args.src}  ({len(files)} file{'s' if len(files) != 1 else ''})")
     print(f"  Dest    : {args.dst or '(dry-run)'}")
-    print(f"  Size    : {args.size}×{args.size}")
+    print(f"  Size    : {args.size}x{args.size}")
     print(f"  Method  : {args.method}")
     if not single:
         print(f"  Workers : {args.workers}")
     if args.dry_run:
         print("  Mode    : DRY RUN — no files will be written")
-    print(f"{'─'*60}\n")
+    print(f"{'─' * 60}\n")
 
     if args.dry_run:
         for f in files:
@@ -220,10 +219,7 @@ def main():
             sys.exit(1)
     else:
         os.makedirs(args.dst, exist_ok=True)
-        work = [
-            (path, os.path.join(args.dst, os.path.basename(path)), args.size, args.method)
-            for path in files
-        ]
+        work = [(path, os.path.join(args.dst, os.path.basename(path)), args.size, args.method) for path in files]
         ok_n = err_n = 0
         with mp.Pool(processes=args.workers) as pool:
             for success, msg in pool.imap_unordered(_worker, work):
@@ -234,10 +230,10 @@ def main():
                     err_n += 1
                     print(f"  FAIL {msg}", file=sys.stderr)
 
-        print(f"\n{'─'*60}")
+        print(f"\n{'─' * 60}")
         print(f"  Done — {ok_n} OK, {err_n} failed  →  {args.dst}")
-    print(f"{'─'*60}\n")
-    if err:
+    print(f"{'─' * 60}\n")
+    if err_n:
         sys.exit(1)
 
 
