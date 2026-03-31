@@ -68,7 +68,13 @@ while [[ $# -gt 0 ]]; do
         --workers)     WORKERS="$2";     shift 2 ;;
         -h|--help) usage ;;
         -*) echo "Unknown option: $1"; usage ;;
-        *)  RAW_DIR="$1"; shift ;;
+        *)
+            if [[ -z "$RAW_DIR" ]]; then
+                RAW_DIR="$1"
+            else
+                OUT_DIR="$1"
+            fi
+            shift ;;
     esac
 done
 
@@ -76,9 +82,14 @@ done
 [[ -d "$RAW_DIR" ]] || { echo "ERROR: '$RAW_DIR' is not a directory."; exit 1; }
 
 RAW_DIR="${RAW_DIR%/}"
-STAGE_CAM="${RAW_DIR}_no_front"
-STAGE_SMOOTH="${RAW_DIR}_smoothed"
-STAGE_TRIM="${RAW_DIR}_trimmed"
+DATASET_NAME="$(basename "$RAW_DIR")"
+# Extract date suffix (last token after final underscore that is all digits)
+DATASET_DATE="$(echo "$DATASET_NAME" | grep -oP '\d+$' || echo "$DATASET_NAME")"
+
+PROCESSED_BASE="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/processed_data"
+STAGE_CAM="${PROCESSED_BASE}/no_front/${DATASET_DATE}"
+STAGE_SMOOTH="${PROCESSED_BASE}/smoothing/${DATASET_DATE}"
+STAGE_TRIM="${PROCESSED_BASE}/trim/${DATASET_DATE}"
 
 # ── helper ────────────────────────────────────────────────────────────────────
 banner() {
