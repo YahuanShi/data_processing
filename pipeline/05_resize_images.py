@@ -30,9 +30,9 @@ perfectly square source images — choose based on your training setup.
 
 Usage:
     python3 05_resize_images.py src [dst]
-    python3 05_resize_images.py path/to/trimmed_dir        training_dataset/
+    python3 05_resize_images.py path/to/trimmed_dir        processed_data/resized/
     python3 05_resize_images.py path/to/episode_0.hdf5     episode_0_224.hdf5
-    python3 05_resize_images.py path/to/trimmed_dir        training_dataset/ --size 256 --method resize
+    python3 05_resize_images.py path/to/trimmed_dir        processed_data/resized/ --size 256 --method resize
     python3 05_resize_images.py path/to/trimmed_dir        --dry-run
 
 Arguments:

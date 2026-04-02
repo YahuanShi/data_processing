@@ -547,7 +547,7 @@ def main():
 
             # ── input ────────────────────────────────────────────────────
             delay = (
-                1 if (paused or mouse.dragging or confirm_delete) else (base_delay // 2 if fast_mode else base_delay)
+                0 if confirm_delete else (1 if (paused or mouse.dragging) else (base_delay // 2 if fast_mode else base_delay))
             )
             key_raw = cv2.waitKeyEx(delay)
             k = key_raw & 0xFF

@@ -19,33 +19,30 @@
 #   viz/viz_trajectory.py    — before/after trajectory comparison
 #
 # Usage:
-#   ./pipeline.sh <raw_dataset_dir> [options]
+#   ./pipeline.sh <raw_dataset_dir> [out_dir] [options]
 #
 # Options:
-#   --out         DIR    final output directory                (default: training_dataset)
+#   --out         DIR    final output directory                (default: processed_data/resized/<date>)
 #   --size        N      target image size in pixels           (default: 224)
 #   --method      STR    resize strategy: center_crop | resize | pad_resize
 #                                                              (default: center_crop)
 #   --window      N      SG filter window, must be odd        (default: 15)
 #   --poly        N      SG polynomial order                  (default: 3)
-#   --cuts        FILE   cuts.json from viz_trajectory.py     (default: cuts.json)
-#   --trim        N      global fallback: frames to cut each end (default: 0)
 #   --keep-front         skip the drop_front_camera step
 #   --workers     N      parallel workers for resize step     (default: 4)
 # ══════════════════════════════════════════════════════════════════════════════
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 # ── defaults ──────────────────────────────────────────────────────────────────
 RAW_DIR=""
-OUT_DIR="training_dataset"
+OUT_DIR=""
 IMG_SIZE=224
 IMG_METHOD="center_crop"
 WINDOW=15
 POLY=3
-CUTS_FILE="cuts.json"
-GLOBAL_TRIM=0
 KEEP_FRONT=0
 WORKERS=4
 
@@ -62,8 +59,6 @@ while [[ $# -gt 0 ]]; do
         --method)      IMG_METHOD="$2";  shift 2 ;;
         --window)      WINDOW="$2";      shift 2 ;;
         --poly)        POLY="$2";        shift 2 ;;
-        --cuts)        CUTS_FILE="$2";   shift 2 ;;
-        --trim)        GLOBAL_TRIM="$2"; shift 2 ;;
         --keep-front)  KEEP_FRONT=1;     shift ;;
         --workers)     WORKERS="$2";     shift 2 ;;
         -h|--help) usage ;;
@@ -71,7 +66,7 @@ while [[ $# -gt 0 ]]; do
         *)
             if [[ -z "$RAW_DIR" ]]; then
                 RAW_DIR="$1"
-            else
+            elif [[ -z "$OUT_DIR" ]]; then
                 OUT_DIR="$1"
             fi
             shift ;;
@@ -83,13 +78,18 @@ done
 
 RAW_DIR="${RAW_DIR%/}"
 DATASET_NAME="$(basename "$RAW_DIR")"
-# Extract date suffix (last token after final underscore that is all digits)
+# Extract date suffix (last sequence of digits at end of name)
 DATASET_DATE="$(echo "$DATASET_NAME" | grep -oP '\d+$' || echo "$DATASET_NAME")"
 
-PROCESSED_BASE="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/processed_data"
+# All processing outputs go under processed_data/
+PROCESSED_BASE="${PROJECT_ROOT}/processed_data"
 STAGE_CAM="${PROCESSED_BASE}/no_front/${DATASET_DATE}"
-STAGE_SMOOTH="${PROCESSED_BASE}/smoothing/${DATASET_DATE}"
-STAGE_TRIM="${PROCESSED_BASE}/trim/${DATASET_DATE}"
+STAGE_SMOOTH="${PROCESSED_BASE}/smoothed/${DATASET_DATE}"
+STAGE_TRIM="${PROCESSED_BASE}/trimmed/${DATASET_DATE}"
+
+# Default final output: processed_data/resized/<date>/
+# training_data/ is reserved for LeRobot-converted datasets (convert_ur5_data_to_lerobot.py)
+[[ -z "$OUT_DIR" ]] && OUT_DIR="${PROCESSED_BASE}/resized/${DATASET_DATE}"
 
 # ── helper ────────────────────────────────────────────────────────────────────
 banner() {
@@ -125,10 +125,7 @@ python3 "$SCRIPT_DIR/03_smooth_episodes.py" "$STAGE_CAM" "$STAGE_SMOOTH" \
 
 # ── Step 4: trim episodes ─────────────────────────────────────────────────────
 banner "Step 4 / 5 — Trim episodes  →  $STAGE_TRIM"
-TRIM_ARGS=("$STAGE_SMOOTH" --output "$STAGE_TRIM")
-[[ -f "$CUTS_FILE" ]] && TRIM_ARGS+=(--cuts "$CUTS_FILE")
-[[ "$GLOBAL_TRIM" -gt 0 ]] && TRIM_ARGS+=(--trim "$GLOBAL_TRIM")
-python3 "$SCRIPT_DIR/04_trim_episodes.py" "${TRIM_ARGS[@]}"
+python3 "$SCRIPT_DIR/04_trim_episodes.py" "$STAGE_SMOOTH" "$STAGE_TRIM"
 
 # ── Step 5: resize images ─────────────────────────────────────────────────────
 banner "Step 5 / 5 — Resize images  ${IMG_SIZE}×${IMG_SIZE} [${IMG_METHOD}]  →  $OUT_DIR"
