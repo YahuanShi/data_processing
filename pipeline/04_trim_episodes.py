@@ -190,7 +190,7 @@ def main():
         "--tail_window", type=int, default=50, help="How many steps from the end to scan for all-still (default: 50)"
     )
     parser.add_argument(
-        "--tail_pad", type=int, default=3, help="Frames to keep after first all-still point in tail (default: 3)"
+        "--tail_pad", type=int, default=5, help="Frames to keep after first all-still point in tail (default: 5)"
     )
     args = parser.parse_args()
 

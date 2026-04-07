@@ -25,7 +25,7 @@ import numpy as np
 from scipy.ndimage import uniform_filter1d
 from scipy.signal import savgol_filter
 
-DEFAULT_WINDOW = 13  # must be odd
+DEFAULT_WINDOW =9  # must be odd
 DEFAULT_POLY = 1
 FLAT_STD_THRESH = 1e-2  # rolling-std threshold to detect flat regions
 FLAT_RANGE_THRESH = 1e-2  # if entire column range < this, skip smoothing it
