@@ -53,7 +53,7 @@ raw episodes (480×480)
     ├── [optional] viz/viz_trajectory.py   ← verify smoothing / trimming
     │
     ▼
-processed_data/resized/ (224×224, HDF5 — ready for LeRobot conversion)
+dataset/processed/resized/ (224×224, HDF5 — ready for LeRobot conversion)
 ```
 
 ---
@@ -156,13 +156,13 @@ Three preprocessing strategies are available:
 
 ```bash
 # Default: 224×224 center crop  (pi0.5 / ACT)
-python3 pipeline/05_resize_images.py trimmed/              processed_data/resized/
+python3 pipeline/05_resize_images.py trimmed/              dataset/processed/resized/
 
 # Single file
 python3 pipeline/05_resize_images.py episode_0.hdf5        episode_0_224.hdf5
 
 # Custom size and method
-python3 pipeline/05_resize_images.py trimmed/              processed_data/resized_256/ --size 256 --method resize
+python3 pipeline/05_resize_images.py trimmed/              dataset/processed/resized_256/ --size 256 --method resize
 
 # Dry-run (omit dst)
 python3 pipeline/05_resize_images.py trimmed/ --dry-run
@@ -185,7 +185,7 @@ Runs all 5 steps sequentially with confirmation prompts between stages.
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| `--out DIR` | `processed_data/resized/<date>` | Final output directory |
+| `--out DIR` | `dataset/processed/resized/<date>` | Final output directory |
 | `--size N` | `224` | Target image size in pixels |
 | `--method STR` | `center_crop` | Resize strategy |
 | `--window N` | `15` | SG filter window (must be odd) |
@@ -193,15 +193,15 @@ Runs all 5 steps sequentially with confirmation prompts between stages.
 | `--keep-front` | — | Skip the drop_front_camera step |
 | `--workers N` | `4` | Parallel workers for resize step |
 
-All outputs go under `processed_data/`:
+All outputs go under `dataset/processed/`:
 ```
-processed_data/no_front/<date>/    after step 2
-processed_data/smoothed/<date>/    after step 3
-processed_data/trimmed/<date>/     after step 4
-processed_data/resized/<date>/     final HDF5 output (step 5)
+dataset/processed/no_front/<date>/    after step 2
+dataset/processed/smoothed/<date>/    after step 3
+dataset/processed/trimmed/<date>/     after step 4
+dataset/processed/resized/<date>/     final HDF5 output (step 5)
 ```
 Intermediates are safe to delete once the pipeline completes successfully.
-`training_data/` is reserved for LeRobot-converted datasets (`convert_ur5_data_to_lerobot.py`).
+`dataset/for_training/` is reserved for LeRobot-converted datasets (`convert_ur5_data_to_lerobot.py`).
 
 ---
 

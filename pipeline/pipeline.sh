@@ -81,14 +81,14 @@ DATASET_NAME="$(basename "$RAW_DIR")"
 # Extract date suffix (last sequence of digits at end of name)
 DATASET_DATE="$(echo "$DATASET_NAME" | grep -oP '\d+$' || echo "$DATASET_NAME")"
 
-# All processing outputs go under processed_data/
-PROCESSED_BASE="${PROJECT_ROOT}/processed_data"
+# All processing outputs go under dataset/processed/
+PROCESSED_BASE="${PROJECT_ROOT}/dataset/processed"
 STAGE_CAM="${PROCESSED_BASE}/no_front/${DATASET_DATE}"
 STAGE_SMOOTH="${PROCESSED_BASE}/smoothed/${DATASET_DATE}"
 STAGE_TRIM="${PROCESSED_BASE}/trimmed/${DATASET_DATE}"
 
-# Default final output: processed_data/resized/<date>/
-# training_data/ is reserved for LeRobot-converted datasets (convert_ur5_data_to_lerobot.py)
+# Default final output: dataset/processed/resized/<date>/
+# dataset/for_training/ is reserved for LeRobot-converted datasets (convert_ur5_data_to_lerobot.py)
 [[ -z "$OUT_DIR" ]] && OUT_DIR="${PROCESSED_BASE}/resized/${DATASET_DATE}"
 
 # ── helper ────────────────────────────────────────────────────────────────────
